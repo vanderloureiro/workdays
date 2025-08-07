@@ -4,6 +4,7 @@ package domain
 import zio.{ULayer, ZIO, ZLayer}
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 case class WorkdaysLive() extends Workdays {
 
@@ -43,12 +44,10 @@ case class WorkdaysLive() extends Workdays {
 
   private def parseDate(date: String): ZIO[Workdays, Nothing, LocalDate] = {
     for {
+      formatter <- ZIO.succeed(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
       parts <- ZIO.succeed(date.split("-"))
       finalDate <- ZIO.attempt{
-        val day = parts(0).toInt
-        val month = parts(1).toInt
-        val year = parts(2).toInt
-        LocalDate.of(year, month, day)
+        LocalDate.parse(date, formatter)
       }.catchAll(e => ZIO.log(s"error: ${e}").as(LocalDate.now()))
     } yield finalDate
   }
