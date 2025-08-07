@@ -7,6 +7,15 @@ import java.time.LocalDate
 
 case class WorkdaysLive() extends Workdays {
 
+  
+  override def isWorkday(date: String): ZIO[Workdays, Nothing, BooleanResponse] = {
+    for {
+      date <- parseDate(date)
+      holidays <- calcHolidays(date.getYear)
+      isHoliday <- ZIO.succeed(holidays.contains(date))
+    } yield BooleanResponse(!isHoliday)
+  }
+
   /*
   *Confraternização Universal	- 1º de janeiro	- Início do ano civil.
   Tiradentes	- 21 de abril	- Em homenagem ao mártir da Inconfidência Mineira Joaquim José da Silva Xavier, o Tiradentes.
@@ -18,23 +27,18 @@ case class WorkdaysLive() extends Workdays {
   Dia Nacional de Zumbi e da Consciência Negra	- 20 de novembro -	Data da Morte de Zumbi dos Palmares.[6]
   Natal	- 25 de dezembro	- Celebração do nascimento de Jesus.
   * */
-  private val currentYear = LocalDate.now().getYear
-  private val diaPrimeiro = LocalDate.of(currentYear, 1, 1)
-  private val tiradentes = LocalDate.of(currentYear, 4, 21)
-  private val independencia = LocalDate.of(currentYear, 9, 7)
-  private val nossaSenhora = LocalDate.of(currentYear, 10, 12)
-  private val finados = LocalDate.of(currentYear, 11, 2)
-  private val proclamacaoRepublica = LocalDate.of(currentYear, 12, 15)
-  private val conscienciaNegra = LocalDate.of(currentYear, 11, 20)
-  private val natal = LocalDate.of(currentYear, 12, 25)
+  private def calcHolidays(year: Int): ZIO[Any, Nothing, List[LocalDate]] = {
+    val diaPrimeiro = LocalDate.of(year, 1, 1)
+    val tiradentes = LocalDate.of(year, 4, 21)
+    val independencia = LocalDate.of(year, 9, 7)
+    val nossaSenhora = LocalDate.of(year, 10, 12)
+    val finados = LocalDate.of(year, 11, 2)
+    val proclamacaoRepublica = LocalDate.of(year, 12, 15)
+    val conscienciaNegra = LocalDate.of(year, 11, 20)
+    val natal = LocalDate.of(year, 12, 25)
 
-  private val holidays = List(diaPrimeiro, tiradentes, independencia, nossaSenhora, finados, proclamacaoRepublica, conscienciaNegra, natal)
-
-  override def isWorkday(date: String): ZIO[Workdays, Nothing, BooleanResponse] = {
-    for {
-      date <- parseDate(date)
-      isHoliday <- ZIO.succeed(holidays.contains(date))
-    } yield BooleanResponse(!isHoliday)
+    val holidays = List(diaPrimeiro, tiradentes, independencia, nossaSenhora, finados, proclamacaoRepublica, conscienciaNegra, natal)
+    ZIO.succeed(holidays)
   }
 
   private def parseDate(date: String): ZIO[Workdays, Nothing, LocalDate] = {
