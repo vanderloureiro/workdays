@@ -1,6 +1,6 @@
 package dev.vanderloureiro
 
-import dev.vanderloureiro.domain.Workdays
+import dev.vanderloureiro.domain.Holidays
 import zio.*
 import zio.http.*
 
@@ -14,12 +14,12 @@ object ApiRoutes {
     Method.GET / "json" -> handler(Response.json("""{"greetings": "Hello World!"}"""))
   }
 
-  val willItBeAHolidayRoute: Route[Workdays, Nothing] = Method.GET / "api" / "will-it-be-a-holiday" -> handler { (req: Request) =>
+  val willItBeAHolidayRoute: Route[Holidays, Nothing] = Method.GET / "api" / "is-holiday" -> handler { (req: Request) =>
     req.query[String]("date") match {
       case Right(dateStr) =>
         for {
-          result <- Workdays.isWorkday(dateStr)
-          json = s"""{"isHoliday": ${!result.value}}"""
+          result <- Holidays.isHoliday(dateStr)
+          json = s"""{"isHoliday": ${result.value}}"""
         } yield Response.json(json)
 
       case Left(error) =>
@@ -28,5 +28,5 @@ object ApiRoutes {
   }
 
   // Create HTTP route
-  val routes: Routes[Workdays, Nothing] = Routes(homeRoute, jsonRoute, willItBeAHolidayRoute)
+  val routes: Routes[Holidays, Nothing] = Routes(homeRoute, jsonRoute, willItBeAHolidayRoute)
 }
