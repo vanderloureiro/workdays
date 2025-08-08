@@ -14,7 +14,14 @@ object ApiRoutes {
     Method.GET / "json" -> handler(Response.json("""{"greetings": "Hello World!"}"""))
   }
 
-  val willItBeAHolidayRoute: Route[Holidays, Nothing] = Method.GET / "api" / "is-holiday" -> handler { (req: Request) =>
+  val getHolidaysRoute: Route[Holidays, Nothing] = Method.GET / "api" / "holidays" -> handler { (req: Request) =>
+    req.query[Int]("year") match {
+      case Right(year) => Holidays.getHolidays(year).map(list => Response.json(list.toString()))
+      case Left(error) => ZIO.succeed(Response.text(s"Invalid or missing 'year' param: ${error.getMessage}").status(Status.BadRequest))
+    }
+  }
+
+  val itIsHolidayRoute: Route[Holidays, Nothing] = Method.GET / "api" / "holidays" / "is-holiday" -> handler { (req: Request) =>
     req.query[String]("date") match {
       case Right(dateStr) =>
         for {
@@ -28,5 +35,5 @@ object ApiRoutes {
   }
 
   // Create HTTP route
-  val routes: Routes[Holidays, Nothing] = Routes(homeRoute, jsonRoute, willItBeAHolidayRoute)
+  val routes: Routes[Holidays, Nothing] = Routes(homeRoute, jsonRoute, itIsHolidayRoute, getHolidaysRoute)
 }

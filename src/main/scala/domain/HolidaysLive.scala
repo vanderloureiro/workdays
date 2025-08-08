@@ -11,7 +11,7 @@ case class HolidaysLive() extends Holidays {
   override def isHoliday(date: String): ZIO[Holidays, Nothing, BooleanResponse] = {
     for {
       date <- parseDate(date)
-      holidays <- calcHolidays(date.getYear)
+      holidays <- getHolidays(date.getYear)
       isHoliday <- ZIO.succeed(holidays.contains(date))
     } yield BooleanResponse(isHoliday)
   }
@@ -26,7 +26,7 @@ case class HolidaysLive() extends Holidays {
     } yield finalDate
   }
 
-  private def calcHolidays(year: Int): ZIO[Any, Nothing, List[LocalDate]] = {
+  def getHolidays(year: Int): ZIO[Any, Nothing, List[LocalDate]] = {
     val diaPrimeiro = LocalDate.of(year, 1, 1)
     val carnaval = carnival(year)
     val sextaFeiraSanta = goodFriday(year)
