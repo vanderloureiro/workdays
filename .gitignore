@@ -45,3 +45,9 @@ build/
 
 ### Scala ###
 .bsp/
+
+# build tool specific entries
+.bloop
+target
+metals.sbt
+project/project

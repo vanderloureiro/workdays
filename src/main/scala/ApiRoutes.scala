@@ -1,39 +1,33 @@
 package dev.vanderloureiro
 
-import dev.vanderloureiro.domain.Holidays
+import dev.vanderloureiro.domain.{BooleanResponse, Holidays}
+import dev.vanderloureiro.Environment.AppEnv
+import sttp.tapir.*
+import sttp.tapir.json.circe.jsonBody
 import zio.*
-import zio.http.*
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
+import sttp.tapir.generic.auto.*
+import sttp.tapir.ztapir.ZServerEndpoint
+import zio.http.{Response, Routes}
+
+import java.time.LocalDate
 
 object ApiRoutes {
 
-  val homeRoute: Route[Any, Nothing] =
-    Method.GET / Root -> handler(Response.text("Hello World!"))
+  val isHolidayRoute: ZServerEndpoint[AppEnv, Any] = endpoint.get
+    .in("api" / "holidays" / "is-holiday")
+    .in(query[String]("date"))
+    .out(jsonBody[BooleanResponse])
+    .serverLogicSuccess(date => Holidays.isHoliday(date))
 
-  // Responds with JSON
-  val jsonRoute: Route[Any, Nothing] = {
-    Method.GET / "json" -> handler(Response.json("""{"greetings": "Hello World!"}"""))
-  }
+  val getHolidaysRoute: ZServerEndpoint[AppEnv, Any] = endpoint.get
+    .in("api" / "holidays")
+    .in(query[String]("year"))
+    .out(jsonBody[List[LocalDate]])
+    .serverLogicSuccess(year => Holidays.getHolidays(year.toInt))
 
-  val getHolidaysRoute: Route[Holidays, Nothing] = Method.GET / "api" / "holidays" -> handler { (req: Request) =>
-    req.query[Int]("year") match {
-      case Right(year) => Holidays.getHolidays(year).map(list => Response.json(list.toString()))
-      case Left(error) => ZIO.succeed(Response.text(s"Invalid or missing 'year' param: ${error.getMessage}").status(Status.BadRequest))
-    }
-  }
+  val tapirEndpoint: ZServerEndpoint[AppEnv, Any] = endpoint.get.in("api" / "health").out(jsonBody[BooleanResponse]).serverLogicSuccess(_ => ZIO.succeed(BooleanResponse(true)))
 
-  val itIsHolidayRoute: Route[Holidays, Nothing] = Method.GET / "api" / "holidays" / "is-holiday" -> handler { (req: Request) =>
-    req.query[String]("date") match {
-      case Right(dateStr) =>
-        for {
-          result <- Holidays.isHoliday(dateStr)
-          json = s"""{"isHoliday": ${result.value}}"""
-        } yield Response.json(json)
-
-      case Left(error) =>
-        ZIO.succeed(Response.text(s"Invalid or missing 'date' param: ${error.getMessage}").status(Status.BadRequest))
-    }
-  }
-
-  // Create HTTP route
-  val routes: Routes[Holidays, Nothing] = Routes(homeRoute, jsonRoute, itIsHolidayRoute, getHolidaysRoute)
+  val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(List(tapirEndpoint, getHolidaysRoute, isHolidayRoute))
+  
 }

@@ -1,10 +1,11 @@
 package dev.vanderloureiro
 
-import domain.HolidaysLive
+import domain.{Holidays, HolidaysLive}
 
 import zio.ULayer
 
 object Environment {
 
+  type AppEnv = Holidays
   val env: ULayer[HolidaysLive] = HolidaysLive.live
 }
