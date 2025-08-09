@@ -8,12 +8,17 @@ import dev.vanderloureiro.domain.{
   Workdays
 }
 import dev.vanderloureiro.Environment.AppEnv
+import sttp.apispec.openapi
 import sttp.tapir.*
+import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
 import sttp.tapir.json.circe.jsonBody
 import zio.*
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.generic.auto.*
+import sttp.tapir.swagger.SwaggerUI
+import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import sttp.tapir.ztapir.ZServerEndpoint
+import zio.http.endpoint.openapi.OpenAPI
 import zio.http.{Response, Routes}
 
 import java.time.LocalDate
@@ -43,8 +48,14 @@ object ApiRoutes {
     .out(jsonBody[BooleanResponse])
     .serverLogicSuccess(_ => ZIO.succeed(BooleanResponse(true)))
 
-  val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(
+  private val endpoints =
     List(tapirEndpoint, getHolidaysRoute, isHolidayRoute, calculateWorkdayRoute)
-  )
 
+  // Docs
+  val swaggerEndpoint: List[ZServerEndpoint[Any, Any]] =
+    SwaggerInterpreter().fromEndpoints[Task](endpoints.map(_.endpoint), "Workday API", "1.0")
+
+  val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(
+    endpoints
+  ) ++ ZioHttpInterpreter().toHttp(swaggerEndpoint)
 }
