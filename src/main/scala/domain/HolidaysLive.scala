@@ -87,5 +87,5 @@ case class HolidaysLive() extends Holidays {
 }
 
 object HolidaysLive {
-  val live: ULayer[HolidaysLive] = ZLayer.succeed(HolidaysLive())
+  val layer: ULayer[HolidaysLive] = ZLayer.succeed(HolidaysLive())
 }

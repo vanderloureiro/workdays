@@ -1,6 +1,12 @@
 package dev.vanderloureiro
 
-import dev.vanderloureiro.domain.{BooleanResponse, Holidays}
+import dev.vanderloureiro.domain.{
+  BooleanResponse,
+  CalculateNextWorkdayInput,
+  CalculateNextWorkdayOutput,
+  Holidays,
+  Workdays
+}
 import dev.vanderloureiro.Environment.AppEnv
 import sttp.tapir.*
 import sttp.tapir.json.circe.jsonBody
@@ -26,13 +32,19 @@ object ApiRoutes {
     .out(jsonBody[List[LocalDate]])
     .serverLogicSuccess(year => Holidays.getHolidays(year.toInt))
 
+  val calculateWorkdayRoute: ZServerEndpoint[AppEnv, Any] = endpoint.post
+    .in("api" / "workdays")
+    .in(jsonBody[CalculateNextWorkdayInput])
+    .out(jsonBody[CalculateNextWorkdayOutput])
+    .serverLogicSuccess(request => Workdays.calculateNextWorkadayFrom(request))
+
   val tapirEndpoint: ZServerEndpoint[AppEnv, Any] = endpoint.get
     .in("api" / "health")
     .out(jsonBody[BooleanResponse])
     .serverLogicSuccess(_ => ZIO.succeed(BooleanResponse(true)))
 
   val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(
-    List(tapirEndpoint, getHolidaysRoute, isHolidayRoute)
+    List(tapirEndpoint, getHolidaysRoute, isHolidayRoute, calculateWorkdayRoute)
   )
 
 }

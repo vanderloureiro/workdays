@@ -1,11 +1,12 @@
 package dev.vanderloureiro
 
-import domain.{Holidays, HolidaysLive}
+import domain.{Holidays, HolidaysLive, Workdays, WorkdaysLive}
 
 import zio.ULayer
 
 object Environment {
 
-  type AppEnv = Holidays
-  val env: ULayer[HolidaysLive] = HolidaysLive.live
+  type AppEnv = Holidays with Workdays
+  
+  val env: ULayer[AppEnv] = HolidaysLive.layer ++ WorkdaysLive.layer
 }
