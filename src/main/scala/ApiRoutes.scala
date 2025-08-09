@@ -26,8 +26,13 @@ object ApiRoutes {
     .out(jsonBody[List[LocalDate]])
     .serverLogicSuccess(year => Holidays.getHolidays(year.toInt))
 
-  val tapirEndpoint: ZServerEndpoint[AppEnv, Any] = endpoint.get.in("api" / "health").out(jsonBody[BooleanResponse]).serverLogicSuccess(_ => ZIO.succeed(BooleanResponse(true)))
+  val tapirEndpoint: ZServerEndpoint[AppEnv, Any] = endpoint.get
+    .in("api" / "health")
+    .out(jsonBody[BooleanResponse])
+    .serverLogicSuccess(_ => ZIO.succeed(BooleanResponse(true)))
 
-  val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(List(tapirEndpoint, getHolidaysRoute, isHolidayRoute))
-  
+  val routes: Routes[AppEnv, Response] = ZioHttpInterpreter().toHttp(
+    List(tapirEndpoint, getHolidaysRoute, isHolidayRoute)
+  )
+
 }

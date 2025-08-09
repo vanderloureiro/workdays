@@ -16,5 +16,6 @@ object Holidays {
   def isHoliday(date: String): ZIO[Holidays, Nothing, BooleanResponse] =
     ZIO.serviceWithZIO[Holidays](_.isHoliday(date))
 
-  def getHolidays(year: Int): ZIO[Holidays, Nothing, List[LocalDate]] = ZIO.serviceWithZIO[Holidays](_.getHolidays(year))
+  def getHolidays(year: Int): ZIO[Holidays, Nothing, List[LocalDate]] =
+    ZIO.serviceWithZIO[Holidays](_.getHolidays(year))
 }
