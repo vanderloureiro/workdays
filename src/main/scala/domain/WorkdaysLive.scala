@@ -3,16 +3,36 @@ package domain
 
 import zio.{ULayer, ZIO, ZLayer}
 
-import java.time.LocalDate
+import java.time.{LocalDate, Period}
 
-case class WorkdaysLive() extends Workdays {
+case class WorkdaysLive(holidaysService: Holidays) extends Workdays {
+
   override def calculateNextWorkadayFrom(
     input: CalculateNextWorkdayInput
-  ): ZIO[Workdays, Nothing, CalculateNextWorkdayOutput] =
-    ZIO.succeed(CalculateNextWorkdayOutput(startDate = LocalDate.now(), LocalDate.now()))
+  ): ZIO[Workdays, Nothing, CalculateNextWorkdayOutput] = for {
+    next <- ZIO.succeed(LocalDate.now())
+    futureDate = input.startDate.plusDays(input.daysQuantity)
+    yearsDiff  = Period.between(input.startDate, futureDate).getYears
+
+    holidays = (0 until yearsDiff - 1).map { year =>
+      holidaysService.getHolidays(LocalDate.now().plusYears(year).getYear)
+    }
+    value = (0 to input.daysQuantity).foldLeft(input.startDate) { (acc, i) =>
+      val current = input.startDate.plusDays(i)
+      if (holidays.contains(current)) acc else current
+    }
+
+    next <- ZIO.succeed(value)
+  } yield CalculateNextWorkdayOutput(
+    startDate = input.startDate,
+    daysQuantity = input.daysQuantity,
+    nextWorkday = next
+  )
 }
 
 object WorkdaysLive {
 
-  val layer: ULayer[WorkdaysLive] = ZLayer.succeed(WorkdaysLive())
+  val layer: ZLayer[Holidays, Nothing, WorkdaysLive] = ZLayer.fromZIO(for {
+    holidays <- ZIO.service[Holidays]
+  } yield WorkdaysLive(holidays))
 }

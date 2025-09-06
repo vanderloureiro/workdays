@@ -2,12 +2,12 @@ package dev.vanderloureiro
 
 import domain.{Holidays, HolidaysLive, Workdays, WorkdaysLive}
 
-import zio.ULayer
+import zio.{ULayer, ZLayer}
 import zio.http.endpoint.openapi.OpenAPI
 
 object Environment {
 
   type AppEnv = Holidays with Workdays
 
-  val env: ULayer[AppEnv] = HolidaysLive.layer ++ WorkdaysLive.layer
+  val env: ULayer[AppEnv] = HolidaysLive.layer >>> WorkdaysLive.layer ++ HolidaysLive.layer
 }

@@ -34,6 +34,7 @@ object CalculateNextWorkdayInput {
 
 case class CalculateNextWorkdayOutput(
   startDate: LocalDate,
+  daysQuantity: Int,
   nextWorkday: LocalDate
 )
 
