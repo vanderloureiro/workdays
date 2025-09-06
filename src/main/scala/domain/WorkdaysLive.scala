@@ -3,7 +3,7 @@ package domain
 
 import zio.{ULayer, ZIO, ZLayer}
 
-import java.time.{LocalDate, Period}
+import java.time.{DayOfWeek, LocalDate, Period}
 
 case class WorkdaysLive(holidaysService: Holidays) extends Workdays {
 
@@ -19,7 +19,12 @@ case class WorkdaysLive(holidaysService: Holidays) extends Workdays {
     }
     value = (0 to input.daysQuantity).foldLeft(input.startDate) { (acc, i) =>
       val current = input.startDate.plusDays(i)
-      if (holidays.contains(current)) acc else current
+      if (
+        holidays.contains(current) || current.getDayOfWeek.equals(
+          DayOfWeek.SATURDAY
+        ) || current.getDayOfWeek.equals(DayOfWeek.SUNDAY)
+      ) acc
+      else current
     }
 
     next <- ZIO.succeed(value)
