@@ -15,6 +15,7 @@ lazy val rootProject = (project in file(".")).settings(
       "com.softwaremill.sttp.tapir"   %% "tapir-zio-http-server"   % tapirVersion,
       "com.softwaremill.sttp.tapir"   %% "tapir-swagger-ui-bundle" % tapirVersion,
       "com.softwaremill.sttp.tapir"   %% "tapir-json-circe"        % tapirVersion,
+      "io.scalaland"                  %% "chimney"                 % "1.5.0",
       "ch.qos.logback"                 % "logback-classic"         % "1.5.16",
       "dev.zio"                       %% "zio-logging"             % "2.1.15",
       "dev.zio"                       %% "zio-logging-slf4j"       % "2.1.15",

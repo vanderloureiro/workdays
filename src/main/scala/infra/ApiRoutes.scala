@@ -1,24 +1,18 @@
 package dev.vanderloureiro
+package infra
 
-import dev.vanderloureiro.domain.{
-  BooleanResponse,
-  CalculateNextWorkdayInput,
-  CalculateNextWorkdayOutput,
-  Holidays,
-  Workdays
-}
-import dev.vanderloureiro.Environment.AppEnv
-import sttp.apispec.openapi
+import Environment.AppEnv
+import domain.*
+import infra.requestresponse.{BooleanResponse, HolidayListResponse, NextWorkdayRequest, NextWorkdayResponse}
+
+import io.scalaland.chimney.dsl.*
 import sttp.tapir.*
-import sttp.tapir.docs.openapi.OpenAPIDocsInterpreter
-import sttp.tapir.json.circe.jsonBody
-import zio.*
-import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.generic.auto.*
-import sttp.tapir.swagger.SwaggerUI
+import sttp.tapir.json.circe.jsonBody
+import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
 import sttp.tapir.ztapir.ZServerEndpoint
-import zio.http.endpoint.openapi.OpenAPI
+import zio.*
 import zio.http.{Response, Routes}
 
 import java.time.LocalDate
@@ -29,19 +23,25 @@ object ApiRoutes {
     .in("api" / "holidays" / "is-holiday")
     .in(query[String]("date"))
     .out(jsonBody[BooleanResponse])
-    .serverLogicSuccess(date => Holidays.isHoliday(date))
+    .serverLogicSuccess(date => Holidays.isHoliday(date).map(result => BooleanResponse(result)))
 
   val getHolidaysRoute: ZServerEndpoint[AppEnv, Any] = endpoint.get
     .in("api" / "holidays")
     .in(query[String]("year"))
-    .out(jsonBody[List[LocalDate]])
-    .serverLogicSuccess(year => Holidays.getHolidays(year.toInt))
+    .out(jsonBody[HolidayListResponse])
+    .serverLogicSuccess(year =>
+      Holidays.getHolidays(year.toInt).map(result => HolidayListResponse(result))
+    )
 
   val calculateWorkdayRoute: ZServerEndpoint[AppEnv, Any] = endpoint.post
     .in("api" / "workdays")
-    .in(jsonBody[CalculateNextWorkdayInput])
-    .out(jsonBody[CalculateNextWorkdayOutput])
-    .serverLogicSuccess(request => Workdays.calculateNextWorkadayFrom(request))
+    .in(jsonBody[NextWorkdayRequest])
+    .out(jsonBody[NextWorkdayResponse])
+    .serverLogicSuccess(request =>
+      Workdays
+        .calculateNextWorkadayFrom(request.transformInto[NextWorkdayInput])
+        .map(result => result.transformInto[NextWorkdayResponse])
+    )
 
   val tapirEndpoint: ZServerEndpoint[AppEnv, Any] = endpoint.get
     .in("api" / "health")

@@ -10,12 +10,12 @@ case class HolidaysLive() extends Holidays {
 
   override def isHoliday(
     date: String
-  ): ZIO[Holidays, Nothing, BooleanResponse] =
+  ): ZIO[Holidays, Nothing, Boolean] =
     for {
       date      <- parseDate(date)
       holidays  <- getHolidays(date.getYear)
       isHoliday <- ZIO.succeed(holidays.contains(date))
-    } yield BooleanResponse(isHoliday)
+    } yield isHoliday
 
   private def parseDate(date: String): ZIO[Holidays, Nothing, LocalDate] =
     for {

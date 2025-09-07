@@ -1,6 +1,7 @@
 package dev.vanderloureiro
 
-import zio.http.{handler, Method, Response, Root, Routes, Server}
+import dev.vanderloureiro.infra.ApiRoutes
+import zio.http.{Method, Response, Root, Routes, Server, handler}
 import zio.ZIOAppDefault
 
 object App extends ZIOAppDefault {

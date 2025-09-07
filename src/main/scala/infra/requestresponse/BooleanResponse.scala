@@ -1,8 +1,8 @@
 package dev.vanderloureiro
-package domain
+package infra.requestresponse
 
+import io.circe.generic.semiauto.*
 import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto._
 
 case class BooleanResponse(val value: Boolean)
 

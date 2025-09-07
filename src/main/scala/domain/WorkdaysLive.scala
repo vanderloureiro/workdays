@@ -8,8 +8,8 @@ import java.time.{DayOfWeek, LocalDate, Period}
 case class WorkdaysLive(holidaysService: Holidays) extends Workdays {
 
   override def calculateNextWorkadayFrom(
-    input: CalculateNextWorkdayInput
-  ): ZIO[Workdays, Nothing, CalculateNextWorkdayOutput] = for {
+    input: NextWorkdayInput
+  ): ZIO[Workdays, Nothing, NextWorkdayOutput] = for {
     next <- ZIO.succeed(LocalDate.now())
     futureDate = input.startDate.plusDays(input.daysQuantity)
     yearsDiff  = Period.between(input.startDate, futureDate).getYears
@@ -28,7 +28,7 @@ case class WorkdaysLive(holidaysService: Holidays) extends Workdays {
     }
 
     next <- ZIO.succeed(value)
-  } yield CalculateNextWorkdayOutput(
+  } yield NextWorkdayOutput(
     startDate = input.startDate,
     daysQuantity = input.daysQuantity,
     nextWorkday = next
