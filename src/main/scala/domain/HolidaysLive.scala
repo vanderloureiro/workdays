@@ -29,30 +29,30 @@ case class HolidaysLive() extends Holidays {
     } yield finalDate
 
   def getHolidays(year: Int): ZIO[Any, Nothing, List[LocalDate]] = {
-    val diaPrimeiro          = LocalDate.of(year, 1, 1)
-    val carnaval             = carnival(year)
-    val sextaFeiraSanta      = goodFriday(year)
-    val corpusCristi         = corpusChristi(year)
-    val tiradentes           = LocalDate.of(year, 4, 21)
-    val independencia        = LocalDate.of(year, 9, 7)
-    val nossaSenhora         = LocalDate.of(year, 10, 12)
-    val finados              = LocalDate.of(year, 11, 2)
-    val proclamacaoRepublica = LocalDate.of(year, 12, 15)
-    val conscienciaNegra     = LocalDate.of(year, 11, 20)
-    val natal                = LocalDate.of(year, 12, 25)
+    val newYearsDay = LocalDate.of(year, 1, 1) // Dia Primeiro
+    val carnival = calcCarnivalDate(year) // Carnaval
+    val goodFriday = calcGoodFridayDate(year) // Sexta-feira Santa
+    val corpusChristi = calcCorpusChristiDate(year) // Corpus Christi
+    val tiradentesDay = LocalDate.of(year, 4, 21) // Tiradentes
+    val independenceDay = LocalDate.of(year, 9, 7) // Independência do Brasil
+    val ourLadyOfAparecida = LocalDate.of(year, 10, 12) // Nossa Senhora Aparecida
+    val allSoulsDay = LocalDate.of(year, 11, 2) // Finados
+    val republicProclamation = LocalDate.of(year, 11, 15) // Proclamação da República
+    val blackAwarenessDay = LocalDate.of(year, 11, 20) // Consciência Negra
+    val christmasDay = LocalDate.of(year, 12, 25) // Natal
 
     val holidays = List(
-      diaPrimeiro,
-      carnaval,
-      sextaFeiraSanta,
-      corpusCristi,
-      tiradentes,
-      independencia,
-      nossaSenhora,
-      finados,
-      proclamacaoRepublica,
-      conscienciaNegra,
-      natal
+      newYearsDay,
+      carnival,
+      goodFriday,
+      corpusChristi,
+      tiradentesDay,
+      independenceDay,
+      ourLadyOfAparecida,
+      allSoulsDay,
+      republicProclamation,
+      blackAwarenessDay,
+      christmasDay
     )
     ZIO.succeed(holidays)
   }
@@ -77,11 +77,11 @@ case class HolidaysLive() extends Holidays {
     LocalDate.of(year, month, day)
   }
 
-  private def carnival(year: Int): LocalDate = easterDate(year).minusDays(47)
+  private def calcCarnivalDate(year: Int): LocalDate = easterDate(year).minusDays(47)
 
-  private def goodFriday(year: Int): LocalDate = easterDate(year).minusDays(2)
+  private def calcGoodFridayDate(year: Int): LocalDate = easterDate(year).minusDays(2)
 
-  private def corpusChristi(year: Int): LocalDate =
+  private def calcCorpusChristiDate(year: Int): LocalDate =
     easterDate(year).plusDays(60)
 
 }
